@@ -1,8 +1,18 @@
 import azure.functions as func
+import json
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    return func.HttpResponse("Function is working properly", status_code=200)
-
+    try:
+        # Parse the JSON data from the request
+        data = req.get_json()
+        # Echo the received data back as a JSON response
+        return func.HttpResponse(json.dumps({
+            "status": "Received",
+            "data": data
+        }), mimetype="application/json", status_code=200)
+    except ValueError:
+        # If there is a JSON parsing error, return an error response
+        return func.HttpResponse("Invalid JSON", status_code=400)
 
 # import azure.functions as func
 # import os
