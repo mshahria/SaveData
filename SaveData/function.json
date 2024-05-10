@@ -1,24 +1,20 @@
 {
-  "bindings": [
-    {
-      "name": "req",
-      "type": "httpTrigger",
-      "direction": "in",
-      "methods": ["post"]
-    },
-    {
-      "name": "$return",
-      "type": "http",
-      "direction": "out"
-    },
-    {
-      "type": "cosmosDB",
-      "name": "outputDocument",
-      "databaseName": "ChatData",
-      "collectionName": "UserDetails",
-      "createIfNotExists": true,
-      "connectionStringSetting": "CosmosDBConnection",
-      "direction": "out"
-    }
-  ]
+    "scriptFile": "__init__.py",
+    "bindings": [
+        {
+            "authLevel": "function",
+            "type": "httpTrigger",
+            "direction": "in",
+            "name": "req",
+            "methods": [
+                "get",
+                "post"
+            ]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "$return"
+        }
+    ]
 }
