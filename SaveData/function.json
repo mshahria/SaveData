@@ -14,7 +14,7 @@
     {
       "type": "cosmosDB",
       "name": "outputDocument",
-      "databaseName": "UserData",
+      "databaseName": "ChatData",
       "collectionName": "UserDetails",
       "createIfNotExists": true,
       "connectionStringSetting": "CosmosDBConnection",
