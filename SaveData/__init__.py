@@ -4,13 +4,13 @@ import json
 def main(req: func.HttpRequest, outputDocument: func.Out[func.Document]) -> func.HttpResponse:
     try:
         data = req.get_json()
-        # Create a new document
         doc = func.Document.from_dict(data)
         outputDocument.set(doc)
         return func.HttpResponse("Document stored", status_code=200)
-    except ValueError:
-        return func.HttpResponse("Invalid JSON", status_code=400)
-
+    except ValueError as e:
+        return func.HttpResponse(f"Invalid JSON: {str(e)}", status_code=400)
+    except Exception as e:
+        return func.HttpResponse(f"Error: {str(e)}", status_code=500)
 
 
 # import azure.functions as func
