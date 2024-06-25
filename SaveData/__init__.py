@@ -5,13 +5,13 @@ import json
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
-        # # Get Cosmos DB client setup from environment variables
-        # endpoint = os.environ['COSMOS_ENDPOINT']
-        # key = os.environ['COSMOS_KEY']
-        # client = CosmosClient(endpoint, credential=key)
+        # Get Cosmos DB client setup from environment variables
+        endpoint = os.environ['COSMOS_ENDPOINT']
+        key = os.environ['COSMOS_KEY']
+        client = CosmosClient(endpoint, credential=key)
 
-        # # Access the specific Cosmos DB database
-        # database = client.get_database_client('SaveData')
+        # Access the specific Cosmos DB database
+        database = client.get_database_client('SaveData')
 
         # Parse the JSON data from the request
         data = req.get_json()
@@ -23,9 +23,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "chatHistory": data["chatHistory"]  # Assuming chatHistory is the key for questions and responses
         }
 
-        # # Access the container based on user_id and insert data
-        # container = database.get_container_client(user_id)
-        # container.upsert_item(store_data)
+        # Access the container based on user_id and insert data
+        container = database.get_container_client(user_id)
+        container.upsert_item(store_data)
 
         return func.HttpResponse(
             json.dumps({"status": "Data stored successfully", "userId": user_id, "data": store_data}),
