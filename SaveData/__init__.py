@@ -25,7 +25,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Access the container based on user_id and insert data
         container = database.get_container_client(user_id)
-        container.upsert_item(store_data)
+        # container.upsert_item(store_data)
 
         return func.HttpResponse(
             json.dumps({"status": "Data stored successfully", "userId": user_id, "data": store_data}),
