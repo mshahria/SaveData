@@ -31,8 +31,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         #     dict(sessionId=data['sessionId'], chatHistory=data['chatHistory'])
         # )
 
+        
+        # for container in database.list_containers():
+        #     print("Container ID: {}".format(container['id']))
+
         return func.HttpResponse(
-            json.dumps({"status": "Data stored successfully", "userId": data['userId'], "data": data['chatHistory']}),
+            json.dumps({"status": "Data stored successfully", "userId": data['userId'], "data": data['chatHistory'], "container": database.list_containers()}),
             status_code=200,
             mimetype="application/json"
         )
