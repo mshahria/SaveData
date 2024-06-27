@@ -8,10 +8,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Get Cosmos DB client setup from environment variables
         endpoint = os.environ['COSMOS_ENDPOINT']
         key = os.environ['COSMOS_KEY']
-        client = CosmosClient(endpoint, credential=key)
+        client = CosmosClient(endpoint, key)
 
         # Access the specific Cosmos DB database
-        database = client.get_database_client('SaveData')
+        database_name = "SaveData"
+        database = client.get_database_client(database=database_name)
 
         # Parse the JSON data from the request
         data = req.get_json()
@@ -27,7 +28,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         container = database.get_container_client(user_id)
         # container.upsert_item(store_data)
         container.upsert_item(
-            dict(sessionId=data["sessionId"], chatHistory=data["chatHistory"])
+            dict(sessionId=data['sessionId'], chatHistory=data['chatHistory'])
         )
 
         return func.HttpResponse(
