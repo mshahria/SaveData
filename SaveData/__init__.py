@@ -1,54 +1,112 @@
-import azure.functions as func
-from azure.cosmos import CosmosClient, exceptions
+from azure.cosmos import exceptions, CosmosClient, PartitionKey
+
 import os
-import json
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
-    try:
-        # Get Cosmos DB client setup from environment variables
-        endpoint = os.environ['COSMOS_ENDPOINT']
-        key = os.environ['COSMOS_KEY']
-        client = CosmosClient(endpoint, key)
+url = os.environ["ACCOUNT_URI"]
+key = os.environ["ACCOUNT_KEY"]
+client = CosmosClient(url, key)
 
-        # Access the specific Cosmos DB database
-        database_name = "SaveData"
-        database = client.get_database_client(database=database_name)
+database_name = "SaveData"
+try:
+    database = client.create_database(id=database_name)
+except exceptions.CosmosResourceExistsError:
+    database = client.get_database_client(database=database_name)
 
-        # Parse the JSON data from the request
-        data = req.get_json()
-        user_id = data['userId']  # Extract the userId from the received data
+container_name = "products"
+try:
+    container = database.create_container(
+        id=container_name, partition_key=PartitionKey(path="/productName")
+    )
+except exceptions.CosmosResourceExistsError:
+    container = database.get_container_client(container_name)
 
-        # Prepare data to be stored
-        store_data = {
-            "sessionId": data["sessionId"],
-            "chatHistory": data["chatHistory"]  # Assuming chatHistory is the key for questions and responses
-        }
+customer_container_name = "customers"
+try:
+    customer_container = database.create_container(
+        id=customer_container_name,
+        partition_key=PartitionKey(path="/city"),
+        default_ttl=200,
+    )
+except exceptions.CosmosResourceExistsError:
+    customer_container = database.get_container_client(customer_container_name)
+# [END create_container_with_settings]
 
-        # Access the container based on user_id and insert data
-        container = database.get_container_client(user_id)
-        # container.upsert_item(store_data)
-        # container.upsert_item(
-        #     dict(sessionId=data['sessionId'], chatHistory=data['chatHistory'])
-        # )
+# [START get_container]
+database = client.get_database_client(database_name)
+container = database.get_container_client(container_name)
+# [END get_container]
 
-        
-        for container in database.list_containers():
-            print("Container ID: {}".format(container['id']))
+# [START list_containers]
+database = client.get_database_client(database_name)
+for container in database.list_containers():
+    print("Container ID: {}".format(container['id']))
+# [END list_containers]
 
-        return func.HttpResponse(
-            json.dumps({"status": "Data stored successfully", "userId": data['userId'], "data": data['chatHistory']}),
-            status_code=200,
-            mimetype="application/json"
-        )
-    except ValueError:
-        # If there is a JSON parsing error, return an error response
-        return func.HttpResponse("Invalid JSON", status_code=400)
-    except exceptions.CosmosHttpResponseError as e:
-        # Handle Cosmos DB errors
-        return func.HttpResponse(f"Error interacting with Cosmos DB: {str(e)}", status_code=500)
-    except Exception as e:
-        # Handle any other exceptions
-        return func.HttpResponse(f"An error occurred: {str(e)}", status_code=500)
+# Insert new items by defining a dict and calling Container.upsert_item
+# [START upsert_items]
+container = database.get_container_client(container_name)
+for i in range(1, 10):
+    container.upsert_item(
+        dict(id="item{}".format(i), productName="Widget", productModel="Model {}".format(i))
+    )
+
+
+
+
+
+
+
+
+
+
+
+# import azure.functions as func
+# from azure.cosmos import CosmosClient, exceptions
+# import os
+# import json
+
+# def main(req: func.HttpRequest) -> func.HttpResponse:
+#     try:
+#         # Get Cosmos DB client setup from environment variables
+#         endpoint = os.environ['COSMOS_ENDPOINT']
+#         key = os.environ['COSMOS_KEY']
+#         client = CosmosClient(endpoint, key)
+
+#         # Access the specific Cosmos DB database
+#         database_name = "SaveData"
+#         database = client.get_database_client(database=database_name)
+
+#         # Parse the JSON data from the request
+#         data = req.get_json()
+#         user_id = data['userId']  # Extract the userId from the received data
+
+#         # Prepare data to be stored
+#         store_data = {
+#             "sessionId": data["sessionId"],
+#             "chatHistory": data["chatHistory"]  # Assuming chatHistory is the key for questions and responses
+#         }
+
+#         # Access the container based on user_id and insert data
+#         container = database.get_container_client(user_id)
+#         # container.upsert_item(store_data)
+#         # container.upsert_item(
+#         #     dict(sessionId=data['sessionId'], chatHistory=data['chatHistory'])
+#         # )
+
+#         return func.HttpResponse(
+#             json.dumps({"status": "Data stored successfully", "userId": data['userId'], "data": data['chatHistory']}),
+#             status_code=200,
+#             mimetype="application/json"
+#         )
+#     except ValueError:
+#         # If there is a JSON parsing error, return an error response
+#         return func.HttpResponse("Invalid JSON", status_code=400)
+#     except exceptions.CosmosHttpResponseError as e:
+#         # Handle Cosmos DB errors
+#         return func.HttpResponse(f"Error interacting with Cosmos DB: {str(e)}", status_code=500)
+#     except Exception as e:
+#         # Handle any other exceptions
+#         return func.HttpResponse(f"An error occurred: {str(e)}", status_code=500)
 
 
 
